@@ -1,5 +1,0 @@
- - instalar sequelize e mysql2
- - conxão com o banco mysql criar string env, depois no index.js fazer o connect
-3 - reescrever as models
-4 - verificar services
-5 - verificar routes 
