@@ -3,7 +3,7 @@ import cors from "cors";
 
 import { configure } from "./routes.js";
 
-class App {
+export class App {
   constructor() {
     this.app = express();
   }
@@ -18,5 +18,3 @@ class App {
     });
   }
 }
-
-export default App;

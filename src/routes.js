@@ -1,14 +1,17 @@
-import { notes, categories } from "./services.js";
+import { NoteService, CategoryService, LoginService, UserService } from "./services.js";
 
 export function configure(app) {
-  app.get("/notes", notes.list);
-  app.get("/notes/:id", notes.get);
-  app.post("/notes", notes.insert);
-  app.delete("/notes/:id", notes.delete);
-  app.put("/notes/:id", notes.update);
-  app.get("/categories", categories.list);
-  app.get("/categories/:id", categories.get);
-  app.post("/categories", categories.insert);
-  app.delete("/categories/:id", categories.delete);
-  app.put("/categories/:id", categories.update);
+  app.get("/notes", LoginService.authenticate, NoteService.list);
+  app.get("/notes/:id", LoginService.authenticate, NoteService.get);
+  app.post("/notes", LoginService.authenticate, NoteService.insert);
+  app.delete("/notes/:id", LoginService.authenticate, NoteService.delete);
+  app.put("/notes/:id", LoginService.authenticate, NoteService.update);
+  app.get("/categories", LoginService.authenticate, CategoryService.list);
+  app.get("/categories/:id", LoginService.authenticate, CategoryService.get);
+  app.post("/categories", LoginService.authenticate, CategoryService.insert);
+  app.delete("/categories/:id", LoginService.authenticate, CategoryService.delete);
+  app.put("/categories/:id", LoginService.authenticate, CategoryService.update);
+  app.post("/login", LoginService.login);
+  // admin only
+  app.get("/users", LoginService.authenticate, LoginService.authorize, UserService.list);
 }

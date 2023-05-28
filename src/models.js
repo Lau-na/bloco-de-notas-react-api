@@ -1,20 +1,61 @@
-import mongoose, { Schema } from "mongoose";
+import { sequelize } from "./sequelize.js";
+import { DataTypes } from "sequelize";
 
-const category = new Schema({
-  description: { type: String, required: true },
-  icon: { type: String, required: true },
-  color: { type: String, required: true },
-});
+//Models
+export const Category = sequelize.define(
+  "category",
+  {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    description: { type: DataTypes.STRING, allowNull: false },
+    icon: { type: DataTypes.STRING, allowNull: false },
+    color: { type: DataTypes.STRING, allowNull: false },
+  },
+  { timestamps: false }
+);
 
-const note = new Schema({
-  title: { type: String, required: true },
-  text: { type: String, required: true },
-  date: { type: Date, required: true },
-  category: { type: category, required: true },
-});
+export const User = sequelize.define(
+  "user",
+  {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    username: { type: DataTypes.STRING, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false },
+    role: { type: DataTypes.STRING, allowNull: false },
+  },
+  { timestamps: false }
+);
 
-category.set("toJSON", { virtuals: true });
-note.set("toJSON", { virtuals: true });
+export const Note = sequelize.define(
+  "note",
+  {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    title: { type: DataTypes.STRING, allowNull: false },
+    text: { type: DataTypes.STRING, allowNull: false },
+    date: { type: DataTypes.DATE, allowNull: false },
+  },
+  { timestamps: false }
+);
 
-export const Note = mongoose.model("Note", note);
-export const Category = mongoose.model("Category", category);
+//Associations
+Category.hasMany(Note);
+Note.belongsTo(Category);
+
+User.hasMany(Note);
+Note.belongsTo(User);
+
+User.hasMany(Category);
+Category.belongsTo(User);

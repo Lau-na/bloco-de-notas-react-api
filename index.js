@@ -1,9 +1,5 @@
-import App from "./src/app.js";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-
-dotenv.config();
-mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
+import "./src/config.js";
+import { App } from "./src/app.js";
 
 const app = new App();
 app.setup();
