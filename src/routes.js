@@ -11,6 +11,7 @@ export function configure(app) {
   app.post("/categories", LoginService.authenticate, CategoryService.insert);
   app.delete("/categories/:id", LoginService.authenticate, CategoryService.delete);
   app.put("/categories/:id", LoginService.authenticate, CategoryService.update);
+  app.post("/users/me", LoginService.authenticate, UserService.me);
   app.post("/login", LoginService.login);
   // admin only
   app.get("/users", LoginService.authenticate, LoginService.authorize, UserService.list);

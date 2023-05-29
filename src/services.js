@@ -4,22 +4,27 @@ import jwt from "jsonwebtoken";
 
 export const NoteService = {
   async get(req, res) {
-    const note = await Note.findByPk(req.params.id);
-    res.status(200).json(note);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const note = await Note.findOne({ where: { id, userId } });
+    if (note) {
+      res.status(200).json(note);
+    } else {
+      res.status(400).json({ message: "Nota não encontrada" });
+    }
   },
 
   async list(req, res) {
-    const options = { include: Category };
+    const userId = req.auth.sub;
+    const options = { include: Category, where: { userId } };
 
     const search = req.query.search;
 
     if (search) {
       const like = `%${search}%`;
-      options.where = {
-        [Op.or]: {
-          title: { [Op.like]: like },
-          text: { [Op.like]: like },
-        },
+      options.where[Op.or] = {
+        title: { [Op.like]: like },
+        text: { [Op.like]: like },
       };
     }
 
@@ -28,50 +33,102 @@ export const NoteService = {
   },
 
   async delete(req, res) {
-    const note = await Note.findByPk(req.params.id);
-    await note.destroy();
-    res.status(200).json(note);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const note = await Note.findOne({ where: { id, userId } });
+    if (note) {
+      await note.destroy();
+      res.status(200).json(note);
+    } else {
+      res.status(400).json({ message: "Nota não encontrada" });
+    }
   },
 
   async insert(req, res) {
-    const note = await Note.create(req.body);
-    res.status(200).json(note);
+    const body = req.body;
+    const userId = req.auth.sub;
+    const note = await Note.create({ ...body, userId });
+    if (note) {
+      res.status(200).json(note);
+    } else {
+      res.status(500).json({ message: "Ocorreu um erro ao criar a nota" });
+    }
   },
 
   async update(req, res) {
-    const note = await Note.findByPk(req.params.id);
-    await note.update(req.body);
-    res.status(200).json(note);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const body = req.body;
+    const note = await Note.findOne({ where: { id, userId } });
+    if (note) {
+      await note.update({ ...body });
+      res.status(200).json(note);
+    } else {
+      res.status(400).json({ message: "Nota não encontrada" });
+    }
   },
 };
 
 export const CategoryService = {
   async get(req, res) {
-    const category = await Category.findByPk(req.params.id);
-    res.status(200).json(category);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const category = await Category.findOne({ where: { id, userId } });
+    if (category) {
+      res.status(200).json(category);
+    } else {
+      res.status(400).json({ message: "Categoria não encontrada" });
+    }
   },
 
   async list(req, res) {
-    const { sub } = req.auth;
-    const categories = await Category.findAll({ where: { userId: sub } });
-    res.status(200).json(categories);
+    const userId = req.auth.sub;
+    const categories = await Category.findAll({ where: { userId } });
+    if (categories) {
+      res.status(200).json(categories);
+    } else {
+      res.status(400).json({ message: "Categorias não encontradas" });
+    }
   },
 
   async delete(req, res) {
-    const category = await Category.findByPk(req.params.id);
-    await category.destroy();
-    res.status(200).json(category);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const category = await Category.findOne({ where: { id, userId } });
+    if (category) {
+      try {
+        await category.destroy();
+        res.status(200).json(category);
+      } catch (error) {
+        res.status(400).json({ message: "Categoria está vinculada a outras notas" });
+      }
+    } else {
+      res.status(400).json({ message: "Categoria não encontrada" });
+    }
   },
 
   async insert(req, res) {
-    const category = await Category.create(req.body);
-    res.status(200).json(category);
+    const body = req.body;
+    const userId = req.auth.sub;
+    const category = await Category.create({ ...body, userId });
+    if (category) {
+      res.status(200).json(category);
+    } else {
+      res.status(500).json({ message: "Ocorreu um erro ao criar a categoria" });
+    }
   },
 
   async update(req, res) {
-    const category = await Category.findByPk(req.params.id);
-    await category.update(req.body);
-    res.status(200).json(category);
+    const id = req.params.id;
+    const userId = req.auth.sub;
+    const body = req.body;
+    const category = await Category.findOne({ where: { id, userId } });
+    if (category) {
+      await category.update({ ...body });
+      res.status(200).json(category);
+    } else {
+      res.status(400).json({ message: "Categoria não encontrada" });
+    }
   },
 };
 
@@ -109,7 +166,11 @@ export const LoginService = {
 
 export const UserService = {
   async list(req, res) {
-    const notes = await User.findAll();
-    res.status(200).json(notes);
+    const users = await User.findAll();
+    res.status(200).json(users);
+  },
+  async me(req, res) {
+    const user = await User.findByPk(req.auth.sub);
+    res.status(200).json(user);
   },
 };
